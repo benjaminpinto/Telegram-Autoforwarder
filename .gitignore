@@ -5,6 +5,7 @@
 credentials.txt
 config.ini
 config.py
+.env
 
 # Cache files
 __pycache__/
