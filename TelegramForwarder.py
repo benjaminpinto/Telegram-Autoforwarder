@@ -60,6 +60,9 @@ class TelegramForwarder:
             # First, populate the entity cache by getting dialogs
             await self.client.get_dialogs()
             
+            # Get destination entity first to populate cache
+            dest_entity = await self.client.get_entity(destination_channel_id)
+            
             # Get source entities and destination entity
             source_entities = []
             source_inputs = []
