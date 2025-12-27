@@ -1,57 +1,97 @@
 # Telegram Autoforwarder
 
-The Telegram Autoforwarder is a Python script that allows you to forward messages from one chat (group or channel) to another based on specified keywords. It works with both groups and channels, requiring only the necessary permissions to access the messages.
+**Original Author:** [Redian Marku](https://github.com/redianmarku/Telegram-Autoforwarder)  
+**License:** MIT
 
-## Features
+## Enhanced Features
 
-- Forward messages containing specific keywords from one chat to another.
-- Works with both groups and channels.
-- Simple setup and usage.
+This fork adds production-ready enhancements:
 
-## How it Works
+- ✅ **Environment variable configuration** - No hardcoded credentials
+- ✅ **Multiple source chats** - Forward from unlimited sources simultaneously
+- ✅ **Working modes** - Interactive (setup) and Process (production)
+- ✅ **Docker support** - Run as containerized service with auto-restart
+- ✅ **Session persistence** - Authenticate once, run forever
+- ✅ **User/Group/Channel support** - Works with all Telegram entity types
 
-The script uses the Telethon library to interact with the Telegram API. You provide the script with your Telegram API ID, API hash, and phone number for authentication. Then, you can choose to list all chats you're a part of and select the ones you want to use for forwarding messages. Once configured, the script continuously checks for messages in the specified source chat and forwards them to the destination chat if they contain any of the specified keywords.
+## Quick Start (Docker)
 
-## Keywords
-
-You can specify one or more keywords that, if found in a message, trigger the forwarding process. Keywords are case-insensitive and can be specified during setup.
-
-## Setup and Usage
-
-1. Clone the repository:
-
+1. **First-time setup** (authenticate):
    ```bash
-   git clone https://github.com/redianmarku/Telegram-Autoforwarder.git
-   cd Telegram-Autoforwarder
+   # Interactive mode to create session file
+   WORKING_MODE=interactive python TelegramForwarder.py
+   # Choose option 1 to list chats and get IDs
    ```
 
-2. Install the required dependencies:
+2. **Configure environment**:
+   ```bash
+   # Create .env file
+   cat > .env << EOF
+   WORKING_MODE=process
+   TELEGRAM_API_ID=your_api_id
+   TELEGRAM_API_HASH=your_api_hash
+   TELEGRAM_PHONE=+1234567890
+   TELEGRAM_SOURCE_IDS=-1001234567890,-1009876543210
+   TELEGRAM_DEST_ID=-1001122334455
+   TELEGRAM_KEYWORDS=
+   EOF
+   ```
 
+3. **Run with Docker Compose**:
+   ```bash
+   docker-compose up -d telegram-forwarder
+   docker-compose logs -f telegram-forwarder
+   ```
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|----------|
+| `WORKING_MODE` | `interactive` or `process` | `process` |
+| `TELEGRAM_API_ID` | Telegram API ID | `12345678` |
+| `TELEGRAM_API_HASH` | Telegram API Hash | `abc123...` |
+| `TELEGRAM_PHONE` | Phone number with country code | `+5583981960846` |
+| `TELEGRAM_SOURCE_IDS` | Comma-separated source chat IDs | `-1001,8298050989` |
+| `TELEGRAM_DEST_ID` | Destination chat ID | `-5119486151` |
+| `TELEGRAM_KEYWORDS` | Filter keywords (empty = forward all) | `promo,deal` |
+
+### Getting Chat IDs
+
+Run in interactive mode:
+```bash
+python TelegramForwarder.py
+# Choose option 1: List Chats
+# Copy the Chat IDs you need
+```
+
+## Manual Setup (Without Docker)
+
+1. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
-3. Configure the script:
+2. Set environment variables or create `.env` file
 
-   - Open `TelegramForwarder.py` file and provide your Telegram API ID, API hash, and phone number in the appropriate variables.
-   - Modify other settings as needed directly in the script.
-
-4. Run the script:
-
+3. Run:
    ```bash
    python TelegramForwarder.py
    ```
 
-5. Choose an option:
-   - List Chats: View a list of all chats you're a part of and select the ones to use for message forwarding.
-   - Forward Messages: Enter the source chat ID, destination chat ID, and keywords to start forwarding messages.
+## How It Works
+
+- Uses Telethon library for Telegram API
+- Polls source chats every 5 seconds for new messages
+- Forwards messages matching keywords (or all if no keywords)
+- Session file persists authentication
+- Works with Users, Groups, and Channels
 
 ## Notes
 
-- Remember to keep your API credentials secure and do not share them publicly.
-- Ensure that you have the necessary permissions to access messages in the chats you want to use.
-- Adjust the script's behavior and settings according to your requirements.
-
-## License
-
-This project is licensed under the MIT License.
+- Get API credentials from [my.telegram.org](https://my.telegram.org)
+- Session file (`session_*.session`) must be preserved
+- Requires read permissions in source chats
+- Requires write permissions in destination chat
+- Keywords are case-insensitive

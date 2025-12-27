@@ -96,7 +96,7 @@ class TelegramForwarder:
                 for message in reversed(messages):
                     if message.text:
                         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                        source_name = source_entities[i].title or f"Chat {source_id}"
+                        source_name = getattr(source_entities[i], 'title', None) or getattr(source_entities[i], 'first_name', f"Chat {source_id}")
                         print(f"[{timestamp}] -> Message received from '{source_name}': {message.text[:50]}{'...' if len(message.text) > 50 else ''}")
                         
                         # Check if the message text includes any of the keywords
