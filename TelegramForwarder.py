@@ -75,9 +75,6 @@ class TelegramForwarder:
                 messages = await self.client.get_messages(source_input, limit=1)
                 last_message_ids[source_id] = messages[0].id if messages else 0
             
-            dest_entity = await self.client.get_entity(destination_channel_id)
-            dest_input = await self.client.get_input_entity(dest_entity)
-            
         except ValueError as e:
             print(f"Error resolving chat entities: {e}")
             print("Make sure the chat IDs are correct and you have access to all chats")
@@ -109,14 +106,20 @@ class TelegramForwarder:
                             
                             if matched_keyword:
                                 print(f"[{timestamp}] -> Matches with keywords? True (matched: '{matched_keyword}')")
-                                await self.client.send_message(dest_input, message.text)
-                                print(f"[{timestamp}] -> Message forwarded")
+                                try:
+                                    await self.client.send_message(destination_channel_id, message.text)
+                                    print(f"[{timestamp}] -> Message forwarded")
+                                except Exception as e:
+                                    print(f"[{timestamp}] -> Error forwarding message: {e}")
                             else:
                                 print(f"[{timestamp}] -> Matches with keywords? False")
                         else:
                             print(f"[{timestamp}] -> Matches with keywords? N/A (forwarding all messages)")
-                            await self.client.send_message(dest_input, message.text)
-                            print(f"[{timestamp}] -> Message forwarded")
+                            try:
+                                await self.client.send_message(destination_channel_id, message.text)
+                                print(f"[{timestamp}] -> Message forwarded")
+                            except Exception as e:
+                                print(f"[{timestamp}] -> Error forwarding message: {e}")
 
                     # Update the last message ID for this source
                     last_message_ids[source_id] = max(last_message_ids[source_id], message.id)
